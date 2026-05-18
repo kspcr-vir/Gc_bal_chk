@@ -20,8 +20,9 @@ export default function App() {
     setResult(null);
 
     try {
-      // In development/Docker, this hits the Express backend directly on the same domain
-      const response = await fetch("/api/balance", {
+      // Allow overriding API URL for separate frontend deployment (e.g. GitHub Pages)
+      const baseUrl = import.meta.env.VITE_API_URL || "";
+      const response = await fetch(`${baseUrl}/api/balance`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

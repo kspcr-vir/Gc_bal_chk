@@ -1,8 +1,11 @@
 import express from "express";
 import path from "path";
 import cors from "cors";
-import { chromium } from "playwright";
+import { chromium } from "playwright-extra";
+import stealth from "puppeteer-extra-plugin-stealth";
 import { createServer as createViteServer } from "vite";
+
+chromium.use(stealth());
 
 async function startServer() {
   const app = express();
@@ -43,8 +46,8 @@ async function startServer() {
       
       console.log("Filling inputs...");
       // Fill in details based on the identified inputs
-      await page.fill("#cardNumber", cardNumber);
-      await page.fill("#cardPin", pin);
+      await page.type("#cardNumber", cardNumber, { delay: 50 });
+      await page.type("#cardPin", pin, { delay: 50 });
       
       console.log("Clicking check balance...");
       await page.getByRole("button", { name: /check balance/i }).click();

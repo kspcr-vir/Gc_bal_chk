@@ -21,16 +21,15 @@ async function test() {
   await page.type("#cardNumber", "1111222233334444", { delay: 50 });
   await page.type("#cardPin", "1234", { delay: 50 });
   await page.getByRole("button", { name: /check balance/i }).click();
-  await page.waitForTimeout(5000);
-  await page.screenshot({ path: 'screenshot.png' });
+  await page.waitForTimeout(6000);
   const text = await page.evaluate(() => document.body.innerText);
-  console.log("BODY TEXT:\n", text.substring(0, 500));
+  console.log("BODY TEXT:\n", text.substring(0, 1000));
   
   const alerts = await page.evaluate(() => {
-    return Array.from(document.querySelectorAll('.alert, .toast, .modal-content, [role="alert"]')).map(el => (el as HTMLElement).innerText);
+    return Array.from(document.querySelectorAll('.alert, .toast, .modal-content, [role="alert"], .error-msg, .text-danger, .msg-error')).map(el => (el as HTMLElement).innerText);
   });
   console.log("ALERTS:", alerts);
-
+  
   await browser.close();
 }
 

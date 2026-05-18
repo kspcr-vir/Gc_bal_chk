@@ -8,14 +8,7 @@ export default defineConfig(({mode}) => {
   return {
     base: './', // Use relative paths for GitHub Pages deployment
     plugins: [
-      react({
-        babel: {
-          presets: [
-             ['@babel/preset-env', { targets: 'defaults', modules: false }]
-          ],
-          plugins: [],
-        },
-      }), 
+      react(), 
       tailwindcss()
     ],
     define: {
