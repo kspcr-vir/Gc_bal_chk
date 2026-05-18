@@ -24,7 +24,11 @@ async function startServer() {
     try {
       console.log("Launching playwright...");
       browser = await chromium.launch({
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        args: [
+          "--no-sandbox", 
+          "--disable-setuid-sandbox",
+          "--disable-blink-features=AutomationControlled" // Try to pass invisible recaptcha passively
+        ],
         headless: true
       });
       console.log("Browser launched");
@@ -46,61 +50,41 @@ async function startServer() {
       await page.getByRole("button", { name: /check balance/i }).click();
 
       // Wait for any network requests or dom mutations, likely 3-5 seconds.
-      // E.g., looking for balance container or an error toast.
       console.log("Waiting for results...");
-      await page.waitForTimeout(5000); 
+      await page.waitForTimeout(6000); 
 
-      // Attempt to extract information
-      // Usually, there's a modal, toast, or specific div. 
-      // We will capture inner text of likely elements, or just grab the whole page text.
-      const pageContent = await page.content();
-      
-      // Let's use a broad extraction logic to find the balance:
-      // Typically the balance is displayed like "â¹ 500" or similar.
-      // We'll return the full text content bounded, so the frontend or further parsing can handle it,
-      // but ideally we extract the relevant part.
-      
-      // Look for text that looks like a balance or error.
-      // Common error messages in woohoo: "Invalid Card Number", "Card is expired"
       const bodyText = await page.evaluate(() => document.body.innerText);
 
-      // Simple heuristic parsing (can be refined if real data is known)
       let balance = null;
       let status = "Unknown";
       let error = null;
 
-      // Check for errors
-      if (bodyText.includes("Invalid")) {
-        error = "Invalid Card Details";
-      } else if (bodyText.match(/balance.*?(\d+)/i)) {
-        // Just extract numbers near balance
-        const match = bodyText.match(/balance.*?([\d,]+)/i);
-        if (match) balance = match[1];
-        status = "Active";
+      // Better parsing:
+      // Avoid matching instructions like "balance enter the 16 digit card number"
+      // Look for typical balance indicators: "Available Balance", "Rs.", "â¹"
+      const balanceMatch = bodyText.match(/(?:available\s*balance|current\s*balance)[\s:â¹₹Rs.]*([\d,]+\.\d{2}|[\d,]+)/i);
+      
+      if (balanceMatch) {
+         balance = balanceMatch[1];
+         status = "Active";
+      } else if (bodyText.match(/invalid|expired|not found|deactivated/i) && !bodyText.match(/To view your card balance/i)) {
+         // Some error on page
+         error = "Invalid Card Details or Card Expired.";
       } else {
-        // Fallback: send the raw body text but truncated
-        error = "Could not parse balance from response.";
+         error = "Could not fetch balance. (Possible CAPTCHA block or invalid details)";
       }
 
-      // To make this robust, we'll just return raw body text if no specific parsing triggers,
-      // and let the client read it or we refine the parsing.
-      // Using page evaluate to look for typical bootstrap/react alert classes or modal text
       const extractedInfo = await page.evaluate(() => {
-        // often alerts are in .alert, .toast, or modals
-        const alerts = Array.from(document.querySelectorAll('.alert, .toast, .modal-content, [role="alert"]')).map(el => (el as HTMLElement).innerText);
-        // Maybe there's a specific balance class
-        const balanceEls = Array.from(document.querySelectorAll('[class*="balance"], [class*="amount"]')).map(el => (el as HTMLElement).innerText);
-        
-        return {
-          alerts,
-          balances: balanceEls
-        };
+        const alerts = Array.from(document.querySelectorAll('.alert, .toast, .modal-content, [role="alert"], .error-msg, .text-danger')).map(el => (el as HTMLElement).innerText);
+        const balances = Array.from(document.querySelectorAll('[class*="balance"], [class*="amount"]')).map(el => (el as HTMLElement).innerText);
+        return { alerts, balances };
       });
 
       res.json({
-        success: true,
+        success: balance !== null || extractedInfo.alerts.length > 0 || error !== "Could not fetch balance. (Possible CAPTCHA block or invalid details)",
+        error,
         extractedInfo,
-        rawText: bodyText.substring(0, 1000) // snippet for debugging
+        rawText: bodyText.substring(0, 1500)
       });
 
     } catch (err: any) {

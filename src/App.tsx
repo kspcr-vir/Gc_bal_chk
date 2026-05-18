@@ -35,13 +35,17 @@ export default function App() {
         throw new Error(data.error || "Failed to fetch balance");
       }
 
+      if (!data.success) {
+        throw new Error(data.error || "Could not fetch balance. The server might be blocking automated requests via CAPTCHA.");
+      }
+
       if (data.extractedInfo?.alerts?.length > 0) {
         // usually alerts contain our errors like "Invalid card"
         setError(data.extractedInfo.alerts.join(", "));
       } else {
         // Attempt to parse out basic data
         const text = data.rawText || "";
-        const match = text.match(/balance.*?([\d,]+)/i) || 
+        const match = text.match(/(?:available\s*balance|current\s*balance)[\s:â¹₹Rs.]*([\d,]+\.\d{2}|[\d,]+)/i) || 
                       data.extractedInfo?.balances?.[0]?.match(/([\d,]+)/);
                       
         if (match) {
