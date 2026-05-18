@@ -1,0 +1,6 @@
+{
+  "name": "Gift Card Balance Checker",
+  "description": "A web application to check Woohoo McD India gift card balances using Playwright browser automation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: gift-card-balance-api
+    env: node
+    buildCommand: npm install && npx playwright install --with-deps chromium && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: PORT
+        value: 3000
