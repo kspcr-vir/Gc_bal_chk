@@ -32,5 +32,7 @@ RUN npm run build
 
 EXPOSE 3000
 
+ENV NODE_ENV=production
+
 # Start command according to package.json
 CMD ["npm", "start"]

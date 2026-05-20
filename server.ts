@@ -39,6 +39,11 @@ process.on('SIGINT', async () => {
   process.exit();
 });
 
+// GET /api/health
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
 // GET /api/check-balance
 app.get("/api/check-balance", async (req, res) => {
   const { card, pin } = req.query;

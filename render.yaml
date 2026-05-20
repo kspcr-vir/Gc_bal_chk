@@ -4,7 +4,9 @@ services:
     # Using Docker environment directly since Playwright relies on OS dependencies
     env: docker
     plan: free
-    healthCheckPath: /
+    healthCheckPath: /api/health
     envVars:
       - key: PORT
         value: 3000
+      - key: NODE_ENV
+        value: production
