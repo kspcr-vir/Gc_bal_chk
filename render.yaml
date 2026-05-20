@@ -1,11 +1,10 @@
 services:
   - type: web
     name: gift-card-balance-api
-    env: node
-    buildCommand: npm install && npx playwright install --with-deps chromium && npm run build
-    startCommand: npm start
+    # Using Docker environment directly since Playwright relies on OS dependencies
+    env: docker
+    plan: free
+    healthCheckPath: /
     envVars:
-      - key: NODE_VERSION
-        value: 20
       - key: PORT
         value: 3000

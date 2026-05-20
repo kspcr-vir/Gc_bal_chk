@@ -1,4 +1,7 @@
-import { chromium } from "playwright";
+import { chromium } from "playwright-extra";
+import stealth from "puppeteer-extra-plugin-stealth";
+
+chromium.use(stealth());
 
 async function test() {
   const browser = await chromium.launch({ 
@@ -11,9 +14,24 @@ async function test() {
   });
   const page = await browser.newPage();
   
-  page.on('response', response => {
-    if (response.url().includes('mcdindia') || response.url().includes('api')) {
-      console.log('<<', response.status(), response.url());
+  page.on('request', request => {
+    if (request.method() === 'POST' && !request.url().includes('google') && !request.url().includes('facebook')) {
+      console.log('>> POST', request.url(), request.postData());
+    }
+  });
+
+  page.on('response', async response => {
+    if (response.request().method() === 'POST' && !response.url().includes('google') && !response.url().includes('facebook')) {
+      console.log('<< POST RESP', response.status(), response.url());
+      try {
+        const json = await response.json();
+        console.log('<< BODY:', JSON.stringify(json).substring(0, 500));
+      } catch (e) {
+         try {
+           const text = await response.text();
+           console.log('<< TEXT:', text.substring(0, 500));
+         } catch (e2) {}
+      }
     }
   });
 
