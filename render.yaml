@@ -1,7 +1,7 @@
 services:
   - type: web
-    name: meri-gift-card-api
-    env: docker
+    name: meribachat-curl-api
+    env: node
     plan: free
     healthCheckPath: /api/health
     startCommand: npm start
