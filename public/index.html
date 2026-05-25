@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gift Card Balance Checker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>Gift Card Balance</h1>
+                <p>Secure tool via proxy API</p>
+            </div>
+
+            <form id="balanceForm">
+                <div class="input-group">
+                    <label for="cardNumber">Card Number</label>
+                    <input type="text" id="cardNumber" placeholder="Enter 16-digit card number" required minlength="16" maxlength="20">
+                </div>
+                
+                <div class="input-group">
+                    <label for="pin">Security PIN</label>
+                    <input type="password" id="pin" placeholder="Enter PIN" required minlength="4" maxlength="10">
+                </div>
+
+                <div id="errorBox" class="error-box hidden">
+                    <span id="errorMessage">An error occurred.</span>
+                </div>
+
+                <button type="submit" id="submitBtn">
+                    <span id="btnText">Check Balance</span>
+                    <span id="btnLoader" class="loader hidden"></span>
+                </button>
+            </form>
+
+            <div id="resultBox" class="result-box hidden">
+                <div class="result-icon">✓</div>
+                <h3>Available Balance</h3>
+                <div class="balance-amount">
+                    <span class="currency">₹</span>
+                    <span id="balanceValue">0.00</span>
+                </div>
+                <div class="status-badge" id="cardStatus">Active</div>
+                
+                <button type="button" id="resetBtn" class="reset-btn">Check Another Card</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
